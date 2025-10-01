@@ -6,9 +6,11 @@ import {
   getInflectionOptions,
   getPosOptions,
 } from '../utils/sparql';
+import FilterRegexp from './FilterRegexp';
 import FilterSelect from './FilterSelect';
 
 const Filters: React.FC = () => {
+  const [lemma, setLemma] = useState<string>('');
   const [inflectionType, setInflectionType] = useState<string>('');
   const [pos, setPos] = useState<string>('');
   const [gender, setGender] = useState<string>('');
@@ -26,6 +28,12 @@ const Filters: React.FC = () => {
           gap: 2,
         }}
       >
+        <FilterRegexp
+          label="Lemma (regexp)"
+          value={lemma}
+          onChange={setLemma}
+        />
+
         <FilterSelect
           label="Inflection Type"
           value={inflectionType}
