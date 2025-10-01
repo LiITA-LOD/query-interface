@@ -1,7 +1,9 @@
-import { OpenInNew } from '@mui/icons-material';
+import { Download, OpenInNew } from '@mui/icons-material';
 import {
   Box,
+  Button,
   CircularProgress,
+  Divider,
   IconButton,
   Paper,
   Table,
@@ -68,11 +70,85 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
     };
   }, [filters, performSearch]);
 
+  const generateSparqlQuery = () => {
+    const conditions: string[] = [];
+
+    if (filters.gender) {
+      conditions.push(
+        `?subject <http://lila-erc.eu/ontologies/lila/hasGender> <${filters.gender}> .`,
+      );
+    }
+
+    if (filters.inflectionType) {
+      conditions.push(
+        `?subject <http://lila-erc.eu/ontologies/lila/hasInflectionType> <${filters.inflectionType}> .`,
+      );
+    }
+
+    if (filters.pos) {
+      conditions.push(
+        `?subject <http://lila-erc.eu/ontologies/lila/hasPOS> <${filters.pos}> .`,
+      );
+    }
+
+    if (filters.lemma) {
+      conditions.push(
+        `?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wrp .`,
+      );
+      conditions.push(`FILTER regex(?wrp, "${filters.lemma}","i") .`);
+    }
+
+    const conditionsString = conditions.join(' ');
+
+    return `
+SELECT ?subject ?wrs ?pos ?lexicons where {
+  {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE { 
+      ${conditionsString}
+      ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink . 
+      BIND(?poslink AS ?pos) .
+      ?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wr .
+      optional {
+          ?le <http://www.w3.org/ns/lemon/ontolex#canonicalForm> ?subject.
+          ?lexicon <http://www.w3.org/ns/lemon/lime#entry> ?le .
+      }
+  } GROUP BY ?subject ?poslink ?pos
+  }
+} order by ?wrs
+    `.trim();
+  };
+
+  const handleDownloadCsv = () => {
+    const query = generateSparqlQuery();
+    const encodedQuery = encodeURIComponent(query);
+    const csvUrl = `https://liita.it/sparql?query=${encodedQuery}&format=text%2Fcsv`;
+    window.open(csvUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-        Search Results
-      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Search Results {results.length > 0 && `(${results.length})`}
+        </Typography>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<Download />}
+          onClick={handleDownloadCsv}
+          disabled={results.length === 0}
+          sx={{ fontSize: '0.75rem', py: 0.5 }}
+        >
+          download csv file
+        </Button>
+      </Box>
+      <Divider sx={{ mb: 2 }} />
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>

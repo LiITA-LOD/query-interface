@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material';
+import { ContentCopy } from '@mui/icons-material';
+import { Box, Button, Divider, Typography } from '@mui/material';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import type { SearchFilters } from '../utils/sparql';
@@ -31,11 +32,86 @@ const Filters: React.FC<FiltersProps> = ({ onFiltersChange }) => {
     onFiltersChange(filters);
   }, [lemma, inflectionType, pos, gender, onFiltersChange]);
 
+  const generateSparqlQuery = () => {
+    const conditions: string[] = [];
+
+    if (gender) {
+      conditions.push(
+        `?subject <http://lila-erc.eu/ontologies/lila/hasGender> <${gender}> .`,
+      );
+    }
+
+    if (inflectionType) {
+      conditions.push(
+        `?subject <http://lila-erc.eu/ontologies/lila/hasInflectionType> <${inflectionType}> .`,
+      );
+    }
+
+    if (pos) {
+      conditions.push(
+        `?subject <http://lila-erc.eu/ontologies/lila/hasPOS> <${pos}> .`,
+      );
+    }
+
+    if (lemma) {
+      conditions.push(
+        `?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wrp .`,
+      );
+      conditions.push(`FILTER regex(?wrp, "${lemma}","i") .`);
+    }
+
+    const conditionsString = conditions.join(' ');
+
+    return `
+SELECT ?subject ?wrs ?pos ?lexicons where {
+  {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE { 
+      ${conditionsString}
+      ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink . 
+      BIND(?poslink AS ?pos) .
+      ?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wr .
+      optional {
+          ?le <http://www.w3.org/ns/lemon/ontolex#canonicalForm> ?subject.
+          ?lexicon <http://www.w3.org/ns/lemon/lime#entry> ?le .
+      }
+  } GROUP BY ?subject ?poslink ?pos
+  }
+} order by ?wrs
+    `.trim();
+  };
+
+  const handleCopySparql = async () => {
+    try {
+      await navigator.clipboard.writeText(generateSparqlQuery());
+    } catch (error) {
+      console.error('Failed to copy SPARQL query:', error);
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-        Search Filters
-      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Search Filters
+        </Typography>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<ContentCopy />}
+          onClick={handleCopySparql}
+          disabled={!lemma && !inflectionType && !pos && !gender}
+          sx={{ fontSize: '0.75rem', py: 0.5 }}
+        >
+          copy sparql query
+        </Button>
+      </Box>
+      <Divider sx={{ mb: 3 }} />
 
       <Box
         sx={{
