@@ -1,32 +1,12 @@
-import { Autocomplete, Box, TextField, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import type React from 'react';
 import { useState } from 'react';
-
-// Placeholder data - will be replaced with API data
-const INFLECTION_OPTIONS = [
-  { value: 'nominative', label: 'Nominative' },
-  { value: 'genitive', label: 'Genitive' },
-  { value: 'dative', label: 'Dative' },
-  { value: 'accusative', label: 'Accusative' },
-  { value: 'ablative', label: 'Ablative' },
-  { value: 'vocative', label: 'Vocative' },
-];
-
-const POS_OPTIONS = [
-  { value: 'noun', label: 'Noun' },
-  { value: 'verb', label: 'Verb' },
-  { value: 'adjective', label: 'Adjective' },
-  { value: 'adverb', label: 'Adverb' },
-  { value: 'pronoun', label: 'Pronoun' },
-  { value: 'preposition', label: 'Preposition' },
-  { value: 'conjunction', label: 'Conjunction' },
-];
-
-const GENDER_OPTIONS = [
-  { value: 'masculine', label: 'Masculine' },
-  { value: 'feminine', label: 'Feminine' },
-  { value: 'neuter', label: 'Neuter' },
-];
+import {
+  getGenderOptions,
+  getInflectionOptions,
+  getPosOptions,
+} from '../utils/sparql';
+import FilterSelect from './FilterSelect';
 
 const Filters: React.FC = () => {
   const [inflectionType, setInflectionType] = useState<string>('');
@@ -46,48 +26,25 @@ const Filters: React.FC = () => {
           gap: 2,
         }}
       >
-        {/* Inflection Type Filter */}
-        <Autocomplete
-          value={
-            INFLECTION_OPTIONS.find(
-              (option) => option.value === inflectionType,
-            ) || null
-          }
-          onChange={(_, newValue) => setInflectionType(newValue?.value || '')}
-          options={INFLECTION_OPTIONS}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value.value}
-          renderInput={(params) => (
-            <TextField {...params} label="Inflection Type" />
-          )}
-          clearOnEscape
-          disableClearable={false}
+        <FilterSelect
+          label="Inflection Type"
+          value={inflectionType}
+          fetchOptions={getInflectionOptions}
+          onChange={setInflectionType}
         />
 
-        {/* POS Filter */}
-        <Autocomplete
-          value={POS_OPTIONS.find((option) => option.value === pos) || null}
-          onChange={(_, newValue) => setPos(newValue?.value || '')}
-          options={POS_OPTIONS}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value.value}
-          renderInput={(params) => <TextField {...params} label="POS" />}
-          clearOnEscape
-          disableClearable={false}
+        <FilterSelect
+          label="POS"
+          value={pos}
+          fetchOptions={getPosOptions}
+          onChange={setPos}
         />
 
-        {/* Gender Filter */}
-        <Autocomplete
-          value={
-            GENDER_OPTIONS.find((option) => option.value === gender) || null
-          }
-          onChange={(_, newValue) => setGender(newValue?.value || '')}
-          options={GENDER_OPTIONS}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value.value}
-          renderInput={(params) => <TextField {...params} label="Gender" />}
-          clearOnEscape
-          disableClearable={false}
+        <FilterSelect
+          label="Gender"
+          value={gender}
+          fetchOptions={getGenderOptions}
+          onChange={setGender}
         />
       </Box>
     </Box>
