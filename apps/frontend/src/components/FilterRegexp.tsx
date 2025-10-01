@@ -58,6 +58,18 @@ const FilterRegexp: React.FC<FilterRegexpProps> = ({
                   <Typography variant="body2" component="div">
                     • <code>[abc]</code> - Any of a, b, or c
                   </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mt: 2, mb: 1 }}>
+                    Examples:
+                  </Typography>
+                  <Typography variant="body2" component="div">
+                    • <code>^am</code> - Words starting with "am"
+                  </Typography>
+                  <Typography variant="body2" component="div">
+                    • <code>are$</code> - Words ending with "are"
+                  </Typography>
+                  <Typography variant="body2" component="div">
+                    • <code>^.+mal.+$</code> - Words containing "mal"
+                  </Typography>
                 </Box>
               }
               arrow
