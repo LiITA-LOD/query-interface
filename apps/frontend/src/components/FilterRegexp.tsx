@@ -1,5 +1,12 @@
-import { Box, IconButton, InputAdornment, TextField, Tooltip, Typography } from '@mui/material';
 import { Clear, Info } from '@mui/icons-material';
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import type React from 'react';
 
 interface FilterRegexpProps {
@@ -23,11 +30,7 @@ const FilterRegexp: React.FC<FilterRegexpProps> = ({
         endAdornment: (
           <InputAdornment position="end">
             {value && (
-              <IconButton
-                size="small"
-                onClick={() => onChange('')}
-                edge="end"
-              >
+              <IconButton size="small" onClick={() => onChange('')} edge="end">
                 <Clear fontSize="small" />
               </IconButton>
             )}

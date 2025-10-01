@@ -151,3 +151,80 @@ export async function getPosOptions(): Promise<FilterOption[]> {
 export async function getGenderOptions(): Promise<FilterOption[]> {
   return getFilterOptions('http://lila-erc.eu/ontologies/lila/hasGender');
 }
+
+export interface SearchFilters {
+  lemma?: string;
+  inflectionType?: string;
+  pos?: string;
+  gender?: string;
+}
+
+export interface SearchResult {
+  subject: string;
+  wrs: string;
+  pos: string;
+  lexicons: string;
+}
+
+export async function searchWithFilters(
+  filters: SearchFilters,
+): Promise<SearchResult[]> {
+  const conditions: string[] = [];
+
+  // Add filter conditions based on provided values
+  if (filters.gender) {
+    conditions.push(
+      `?subject <http://lila-erc.eu/ontologies/lila/hasGender> <${filters.gender}> .`,
+    );
+  }
+
+  if (filters.inflectionType) {
+    conditions.push(
+      `?subject <http://lila-erc.eu/ontologies/lila/hasInflectionType> <${filters.inflectionType}> .`,
+    );
+  }
+
+  if (filters.pos) {
+    conditions.push(
+      `?subject <http://lila-erc.eu/ontologies/lila/hasPOS> <${filters.pos}> .`,
+    );
+  }
+
+  if (filters.lemma) {
+    conditions.push(
+      `?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wrp .`,
+    );
+    conditions.push(`FILTER regex(?wrp, "${filters.lemma}","i") .`);
+  }
+
+  const conditionsString = conditions.join(' ');
+
+  const query = `
+    SELECT ?subject ?wrs ?pos ?lexicons where {
+      {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE { 
+          ${conditionsString}
+          ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink . 
+          BIND(?poslink AS ?pos) .
+          ?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wr .
+          optional {
+              ?le <http://www.w3.org/ns/lemon/ontolex#canonicalForm> ?subject.
+              ?lexicon <http://www.w3.org/ns/lemon/lime#entry> ?le .
+          }
+      } GROUP BY ?subject ?poslink ?pos
+      }
+    } order by ?wrs
+  `;
+
+  try {
+    const data = await client(query);
+    return data.results.bindings.map((binding) => ({
+      subject: binding.subject.value,
+      wrs: binding.wrs.value,
+      pos: binding.pos.value,
+      lexicons: binding.lexicons.value,
+    }));
+  } catch (error) {
+    console.error('Search query failed:', error);
+    return [];
+  }
+}

@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { SearchFilters } from '../utils/sparql';
 import {
   getGenderOptions,
   getInflectionOptions,
@@ -9,11 +10,26 @@ import {
 import FilterRegexp from './FilterRegexp';
 import FilterSelect from './FilterSelect';
 
-const Filters: React.FC = () => {
+interface FiltersProps {
+  onFiltersChange: (filters: SearchFilters) => void;
+}
+
+const Filters: React.FC<FiltersProps> = ({ onFiltersChange }) => {
   const [lemma, setLemma] = useState<string>('');
   const [inflectionType, setInflectionType] = useState<string>('');
   const [pos, setPos] = useState<string>('');
   const [gender, setGender] = useState<string>('');
+
+  // Notify parent component when filters change
+  useEffect(() => {
+    const filters: SearchFilters = {
+      lemma: lemma || undefined,
+      inflectionType: inflectionType || undefined,
+      pos: pos || undefined,
+      gender: gender || undefined,
+    };
+    onFiltersChange(filters);
+  }, [lemma, inflectionType, pos, gender, onFiltersChange]);
 
   return (
     <Box sx={{ p: 3 }}>
