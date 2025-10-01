@@ -11,6 +11,7 @@ import { darkTheme, lightTheme } from "./themes";
 import type React from 'react';
 import { useState } from 'react';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import Search from './components/Search';
 
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -45,6 +46,7 @@ const App: React.FC = () => {
         </AppBar>
 
         <Container component="main" sx={{ flex: 1, py: 4, maxWidth: 'lg' }}>
+          <Search />
         </Container>
       </Box>
     </ThemeProvider>
