@@ -11,6 +11,7 @@ import { darkTheme, lightTheme } from "./themes";
 import type React from 'react';
 import { useState } from 'react';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import NavigationLinks from './components/NavigationLinks';
 import Search from './components/Search';
 
 const App: React.FC = () => {
@@ -21,6 +22,11 @@ const App: React.FC = () => {
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
+
+  const navigationLinks = [
+    { url: 'https://liita.it', label: 'Home' },
+    { url: 'https://liita.it/sparql', label: 'SPARQL Query Editor' },
+  ];
 
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
@@ -34,12 +40,7 @@ const App: React.FC = () => {
               <Typography variant="h1" component="h1" sx={{ mb: 0.5 }}>
                 LiITA Query Interface
               </Typography>
-              <Typography
-                variant="body1"
-                sx={{ opacity: 0.8, fontWeight: 400 }}
-              >
-                Lemma Bank Interrogation Tool
-              </Typography>
+              <NavigationLinks links={navigationLinks} />
             </Box>
             <ThemeSwitcher mode={isDarkMode ? 'dark' : 'light'} onToggleTheme={toggleTheme} />
           </Toolbar>
