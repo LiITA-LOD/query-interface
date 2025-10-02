@@ -9,6 +9,7 @@ import {
 import { ThemeProvider } from '@mui/material/styles';
 import type React from 'react';
 import { useState } from 'react';
+import FloatingLogo from './components/FloatingLogo';
 import NavigationLinks from './components/NavigationLinks';
 import Search from './components/Search';
 import ThemeSwitcher from './components/ThemeSwitcher';
@@ -36,6 +37,7 @@ const App: React.FC = () => {
       >
         <AppBar position="static" elevation={0}>
           <Toolbar sx={{ justifyContent: 'center', py: 2 }}>
+            <FloatingLogo />
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h1" component="h1" sx={{ mb: 0.5 }}>
                 LiITA Query Interface
