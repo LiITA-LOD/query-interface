@@ -36,17 +36,6 @@ async function client(
   return data;
 }
 
-export interface SearchResult {
-  uri: string;
-  upos: string;
-  label: string;
-  writtenRepresentations: string[];
-}
-
-function uriToUPOS(uri: string): string {
-  return POS_URI_TO_UPOS[uri] || uri.split('/').pop() || '';
-}
-
 function uriToLabel(uri: string, mapping: Record<string, string>): string {
   return mapping[uri] || uri.split('/').pop() || uri;
 }
@@ -63,22 +52,6 @@ function uriToPosLabel(uri: string): string {
   return uriToLabel(uri, POS_URI_TO_LABEL);
 }
 
-const POS_URI_TO_UPOS: Record<string, string> = {
-  'http://lila-erc.eu/ontologies/lila/adjective': 'ADJ',
-  'http://lila-erc.eu/ontologies/lila/adposition': 'ADP',
-  'http://lila-erc.eu/ontologies/lila/adverb': 'ADV',
-  'http://lila-erc.eu/ontologies/lila/coordinating_conjunction': 'CCONJ',
-  'http://lila-erc.eu/ontologies/lila/determiner': 'DET',
-  'http://lila-erc.eu/ontologies/lila/interjection': 'INTJ',
-  'http://lila-erc.eu/ontologies/lila/noun': 'NOUN',
-  'http://lila-erc.eu/ontologies/lila/numeral': 'NUM',
-  'http://lila-erc.eu/ontologies/lila/other': 'X',
-  'http://lila-erc.eu/ontologies/lila/particle': 'PART',
-  'http://lila-erc.eu/ontologies/lila/pronoun': 'PRON',
-  'http://lila-erc.eu/ontologies/lila/proper_noun': 'PROPN',
-  'http://lila-erc.eu/ontologies/lila/subordinating_conjunction': 'SCONJ',
-  'http://lila-erc.eu/ontologies/lila/verb': 'VERB',
-};
 
 const GENDER_URI_TO_LABEL: Record<string, string> = {
   'http://lila-erc.eu/ontologies/lila/feminine': 'Feminine',
@@ -118,54 +91,6 @@ const POS_URI_TO_LABEL: Record<string, string> = {
   'http://lila-erc.eu/ontologies/lila/verb': 'Verb',
 };
 
-export async function search(regex: string): Promise<SearchResult[]> {
-  const query = `
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX ontolex: <http://www.w3.org/ns/lemon/ontolex#>
-PREFIX lila: <http://lila-erc.eu/ontologies/lila/>
-
-SELECT ?uri ?uposUri ?label (GROUP_CONCAT(DISTINCT ?wr; SEPARATOR="\\u0000") AS ?wrs)
-FROM <http://liita.it/data>
-WHERE {
-  ?uri lila:hasPOS ?uposUri ;
-         ontolex:writtenRep ?wr ;
-         rdfs:label ?label .
-  FILTER regex(?wr, "${regex}","i")
-}
-GROUP BY ?uri ?uposUri ?label
-ORDER BY ?wrs
-LIMIT 100
-`;
-
-  try {
-    const data = await client(query);
-
-    // Parse SPARQL JSON results and return simplified structure
-    const results: SearchResult[] = data.results.bindings.map((binding) => ({
-      uri: binding.uri.value,
-      upos: uriToUPOS(binding.uposUri.value),
-      label: binding.label.value,
-      writtenRepresentations: binding.wrs.value.split('\u0000'),
-    }));
-
-    return results;
-  } catch (error) {
-    console.error('SPARQL query failed:', error);
-    return [];
-  }
-}
-
-export async function getAllPredicates(uri: string): Promise<SparqlBinding[]> {
-  const query = `SELECT * WHERE { <${uri}> ?predicate ?object }`;
-
-  try {
-    const data = await client(query);
-    return data.results.bindings;
-  } catch (error) {
-    console.error('SPARQL fetch failed:', error);
-    return [];
-  }
-}
 
 export interface FilterOption {
   value: string;
@@ -237,9 +162,7 @@ export interface SearchResult {
   lexicons: string;
 }
 
-export async function searchWithFilters(
-  filters: SearchFilters,
-): Promise<SearchResult[]> {
+export function generateSparqlQuery(filters: SearchFilters): string {
   const conditions: string[] = [];
 
   // Add filter conditions based on provided values
@@ -270,21 +193,27 @@ export async function searchWithFilters(
 
   const conditionsString = conditions.join(' ');
 
-  const query = `
-    SELECT ?subject ?wrs ?pos ?lexicons where {
-      {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE {
-          ${conditionsString}
-          ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink .
-          BIND(?poslink AS ?pos) .
-          ?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wr .
-          optional {
-              ?le <http://www.w3.org/ns/lemon/ontolex#canonicalForm> ?subject.
-              ?lexicon <http://www.w3.org/ns/lemon/lime#entry> ?le .
-          }
-      } GROUP BY ?subject ?poslink ?pos
+  return `
+SELECT ?subject ?wrs ?pos ?lexicons where {
+  {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE { 
+      ${conditionsString}
+      ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink . 
+      BIND(?poslink AS ?pos) .
+      ?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wr .
+      optional {
+          ?le <http://www.w3.org/ns/lemon/ontolex#canonicalForm> ?subject.
+          ?lexicon <http://www.w3.org/ns/lemon/lime#entry> ?le .
       }
-    } order by ?wrs
-  `;
+  } GROUP BY ?subject ?poslink ?pos
+  }
+} order by ?wrs
+  `.trim();
+}
+
+export async function searchWithFilters(
+  filters: SearchFilters,
+): Promise<SearchResult[]> {
+  const query = generateSparqlQuery(filters);
 
   try {
     const data = await client(query);

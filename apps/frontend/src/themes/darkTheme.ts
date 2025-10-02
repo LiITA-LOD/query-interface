@@ -24,14 +24,6 @@ const darkTheme = createTheme({
         },
       },
     },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          borderRadius: 6,
-          fontWeight: 500,
-        },
-      },
-    },
   },
 });
 

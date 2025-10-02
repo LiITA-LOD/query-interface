@@ -23,7 +23,6 @@
             pname = "liita-queryinterface-frontend";
             version = "0.1.0";
             src = ./.;
-            SPARQL_URL = "https://www.liita.it/sparql/"; # FIXME: perhaps not great to have it here
             buildInputs = with pkgs; [
               nodejs
               pnpm
@@ -31,7 +30,7 @@
             ];
             pnpmDeps = pkgs.pnpm.fetchDeps {
               inherit (finalAttrs) pname version src;
-              hash = "sha256-WLJdUUb+P/bUE7MOEAu7o4lEhJn3D8UA8xobznx738I=";
+              hash = "sha256-HqpwQeE3Aef5Eoe+nn4A5nimsntzkgm1+Rc5EONFqYw=";
             };
             buildPhase = ''
               pnpm run build

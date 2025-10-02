@@ -8,8 +8,5 @@ export default defineConfig({
   },
   html: {
     title: 'LiITA Query Interface',
-    meta: {
-      ...(process.env.SPARQL_URL && { 'sparql-url': process.env.SPARQL_URL }),
-    },
   },
 });

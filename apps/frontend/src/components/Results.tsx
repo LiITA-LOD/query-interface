@@ -17,7 +17,7 @@ import {
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SearchFilters, SearchResult } from '../utils/sparql';
-import { searchWithFilters } from '../utils/sparql';
+import { generateSparqlQuery, searchWithFilters } from '../utils/sparql';
 
 interface ResultsProps {
   filters: SearchFilters;
@@ -70,55 +70,9 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
     };
   }, [filters, performSearch]);
 
-  const generateSparqlQuery = () => {
-    const conditions: string[] = [];
-
-    if (filters.gender) {
-      conditions.push(
-        `?subject <http://lila-erc.eu/ontologies/lila/hasGender> <${filters.gender}> .`,
-      );
-    }
-
-    if (filters.inflectionType) {
-      conditions.push(
-        `?subject <http://lila-erc.eu/ontologies/lila/hasInflectionType> <${filters.inflectionType}> .`,
-      );
-    }
-
-    if (filters.pos) {
-      conditions.push(
-        `?subject <http://lila-erc.eu/ontologies/lila/hasPOS> <${filters.pos}> .`,
-      );
-    }
-
-    if (filters.lemma) {
-      conditions.push(
-        `?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wrp .`,
-      );
-      conditions.push(`FILTER regex(?wrp, "${filters.lemma}","i") .`);
-    }
-
-    const conditionsString = conditions.join(' ');
-
-    return `
-SELECT ?subject ?wrs ?pos ?lexicons where {
-  {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE { 
-      ${conditionsString}
-      ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink . 
-      BIND(?poslink AS ?pos) .
-      ?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wr .
-      optional {
-          ?le <http://www.w3.org/ns/lemon/ontolex#canonicalForm> ?subject.
-          ?lexicon <http://www.w3.org/ns/lemon/lime#entry> ?le .
-      }
-  } GROUP BY ?subject ?poslink ?pos
-  }
-} order by ?wrs
-    `.trim();
-  };
 
   const handleDownloadCsv = () => {
-    const query = generateSparqlQuery();
+    const query = generateSparqlQuery(filters);
     const encodedQuery = encodeURIComponent(query);
     const csvUrl = `https://liita.it/sparql?query=${encodedQuery}&format=text%2Fcsv`;
     window.open(csvUrl, '_blank', 'noopener,noreferrer');
