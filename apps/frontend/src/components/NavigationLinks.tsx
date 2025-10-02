@@ -12,7 +12,14 @@ interface NavigationLinksProps {
 
 const NavigationLinks: React.FC<NavigationLinksProps> = ({ links }) => {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 1,
+      }}
+    >
       {links.map((link, index) => (
         <React.Fragment key={link.url}>
           <Link
@@ -33,7 +40,9 @@ const NavigationLinks: React.FC<NavigationLinksProps> = ({ links }) => {
             {link.label}
           </Link>
           {index < links.length - 1 && (
-            <Typography sx={{ opacity: 0.5, fontSize: '0.875rem' }}>·</Typography>
+            <Typography sx={{ opacity: 0.5, fontSize: '0.875rem' }}>
+              ·
+            </Typography>
           )}
         </React.Fragment>
       ))}

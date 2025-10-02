@@ -1,5 +1,5 @@
+import { DarkMode, LightMode } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
-import { LightMode, DarkMode } from '@mui/icons-material';
 import type React from 'react';
 
 interface ThemeSwitcherProps {
@@ -7,7 +7,10 @@ interface ThemeSwitcherProps {
   onToggleTheme: () => void;
 }
 
-const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ mode, onToggleTheme }) => {
+const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
+  mode,
+  onToggleTheme,
+}) => {
   return (
     <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} theme`}>
       <IconButton

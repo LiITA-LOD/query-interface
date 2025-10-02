@@ -52,7 +52,6 @@ function uriToPosLabel(uri: string): string {
   return uriToLabel(uri, POS_URI_TO_LABEL);
 }
 
-
 const GENDER_URI_TO_LABEL: Record<string, string> = {
   'http://lila-erc.eu/ontologies/lila/feminine': 'Feminine',
   'http://lila-erc.eu/ontologies/lila/masculine': 'Masculine',
@@ -78,7 +77,8 @@ const POS_URI_TO_LABEL: Record<string, string> = {
   'http://lila-erc.eu/ontologies/lila/adjective': 'Adjective',
   'http://lila-erc.eu/ontologies/lila/adposition': 'Adposition',
   'http://lila-erc.eu/ontologies/lila/adverb': 'Adverb',
-  'http://lila-erc.eu/ontologies/lila/coordinating_conjunction': 'Coordinating Conjunction',
+  'http://lila-erc.eu/ontologies/lila/coordinating_conjunction':
+    'Coordinating Conjunction',
   'http://lila-erc.eu/ontologies/lila/determiner': 'Determiner',
   'http://lila-erc.eu/ontologies/lila/interjection': 'Interjection',
   'http://lila-erc.eu/ontologies/lila/noun': 'Noun',
@@ -87,10 +87,10 @@ const POS_URI_TO_LABEL: Record<string, string> = {
   'http://lila-erc.eu/ontologies/lila/particle': 'Particle',
   'http://lila-erc.eu/ontologies/lila/pronoun': 'Pronoun',
   'http://lila-erc.eu/ontologies/lila/proper_noun': 'Proper Noun',
-  'http://lila-erc.eu/ontologies/lila/subordinating_conjunction': 'Subordinating Conjunction',
+  'http://lila-erc.eu/ontologies/lila/subordinating_conjunction':
+    'Subordinating Conjunction',
   'http://lila-erc.eu/ontologies/lila/verb': 'Verb',
 };
-
 
 export interface FilterOption {
   value: string;
@@ -114,7 +114,9 @@ async function getFilterOptions(predicate: string): Promise<FilterOption[]> {
       // Choose the appropriate label mapping based on the predicate
       if (predicate === 'http://lila-erc.eu/ontologies/lila/hasGender') {
         label = uriToGenderLabel(uri);
-      } else if (predicate === 'http://lila-erc.eu/ontologies/lila/hasInflectionType') {
+      } else if (
+        predicate === 'http://lila-erc.eu/ontologies/lila/hasInflectionType'
+      ) {
         label = uriToInflectionTypeLabel(uri);
       } else if (predicate === 'http://lila-erc.eu/ontologies/lila/hasPOS') {
         label = uriToPosLabel(uri);

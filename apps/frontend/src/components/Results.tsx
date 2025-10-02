@@ -70,7 +70,6 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
     };
   }, [filters, performSearch]);
 
-
   const handleDownloadCsv = () => {
     const query = generateSparqlQuery(filters);
     const encodedQuery = encodeURIComponent(query);

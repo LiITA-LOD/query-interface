@@ -58,7 +58,10 @@ const FilterRegexp: React.FC<FilterRegexpProps> = ({
                   <Typography variant="body2" component="div">
                     • <code>[abc]</code> - Any of a, b, or c
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mt: 2, mb: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, mt: 2, mb: 1 }}
+                  >
                     Examples:
                   </Typography>
                   <Typography variant="body2" component="div">

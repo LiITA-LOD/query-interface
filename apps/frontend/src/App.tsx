@@ -7,16 +7,16 @@ import {
   Typography,
 } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
-import { darkTheme, lightTheme } from "./themes";
 import type React from 'react';
 import { useState } from 'react';
-import ThemeSwitcher from './components/ThemeSwitcher';
 import NavigationLinks from './components/NavigationLinks';
 import Search from './components/Search';
+import ThemeSwitcher from './components/ThemeSwitcher';
+import { darkTheme, lightTheme } from './themes';
 
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
   });
 
   const toggleTheme = () => {
@@ -42,7 +42,10 @@ const App: React.FC = () => {
               </Typography>
               <NavigationLinks links={navigationLinks} />
             </Box>
-            <ThemeSwitcher mode={isDarkMode ? 'dark' : 'light'} onToggleTheme={toggleTheme} />
+            <ThemeSwitcher
+              mode={isDarkMode ? 'dark' : 'light'}
+              onToggleTheme={toggleTheme}
+            />
           </Toolbar>
         </AppBar>
 
