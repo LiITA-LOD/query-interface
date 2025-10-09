@@ -198,6 +198,7 @@ export function generateSparqlQuery(filters: SearchFilters): string {
   return `
 SELECT ?subject ?wrs ?pos ?lexicons where {
   {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE { 
+      ?subject <http://purl.org/dc/terms/isPartOf> <http://liita.it/data/id/lemma/LemmaBank> .
       ${conditionsString}
       ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink . 
       BIND(?poslink AS ?pos) .
