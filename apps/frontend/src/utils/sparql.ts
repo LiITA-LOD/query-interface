@@ -147,7 +147,9 @@ export async function getPosOptions(): Promise<FilterOption[]> {
 }
 
 export async function getGenderOptions(): Promise<FilterOption[]> {
-  return getFilterOptions('http://lila-erc.eu/ontologies/lila/hasGender');
+  const results = (await getFilterOptions('http://lila-erc.eu/ontologies/lila/hasGender'));
+  // NOTE: this filter is a hack to counteract the fact we're using non-italian genders for italian
+  return results.filter(({ value }) => !value.endsWith("neuter"));
 }
 
 export interface SearchFilters {
@@ -197,10 +199,10 @@ export function generateSparqlQuery(filters: SearchFilters): string {
 
   return `
 SELECT ?subject ?wrs ?pos ?lexicons where {
-  {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE { 
+  {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE {
       ?subject <http://purl.org/dc/terms/isPartOf> <http://liita.it/data/id/lemma/LemmaBank> .
       ${conditionsString}
-      ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink . 
+      ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink .
       BIND(?poslink AS ?pos) .
       ?subject <http://www.w3.org/ns/lemon/ontolex#writtenRep> ?wr .
       optional {
