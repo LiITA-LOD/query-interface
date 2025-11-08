@@ -24,11 +24,6 @@ const App: React.FC = () => {
     setIsDarkMode(!isDarkMode);
   };
 
-  const navigationLinks = [
-    { url: 'https://liita.it', label: 'Back to Home' },
-    { url: 'https://liita.it/sparql', label: 'SPARQL Query Editor' },
-  ];
-
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <CssBaseline />
@@ -42,7 +37,7 @@ const App: React.FC = () => {
               <Typography variant="h1" component="h1" sx={{ mb: 0.5 }}>
                 LiITA Query Interface
               </Typography>
-              <NavigationLinks links={navigationLinks} />
+              <NavigationLinks />
             </Box>
             <ThemeSwitcher
               mode={isDarkMode ? 'dark' : 'light'}
