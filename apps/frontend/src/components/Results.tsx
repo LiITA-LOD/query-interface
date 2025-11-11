@@ -136,7 +136,7 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
                           'noopener,noreferrer',
                         )
                       }
-                      title="Open data sheet"
+                      title={result.subject}
                     >
                       <OpenInNew fontSize="small" />
                     </IconButton>
